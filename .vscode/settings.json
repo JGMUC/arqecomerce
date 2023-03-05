@@ -1,0 +1,11 @@
+{
+    "java.dependency.packagePresentation": "hierarchical",
+    "java.dependency.syncWithFolderExplorer": true,
+    "java.project.sourcePaths": [
+        "src\\main\\resources",
+        "src\\test\\java",
+        "target\\generated-sources\\annotations",
+        "target\\generated-test-sources\\test-annotations"
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
+}

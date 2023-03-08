@@ -46,4 +46,3 @@ public class ProductController {
         return pService.updateProduct(product);
     }
 }
-

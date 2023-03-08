@@ -1,5 +1,5 @@
+import logo_transparent from "./assets/logo_transparent.png";
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
@@ -128,19 +128,19 @@ class App extends React.Component {
     
     return (
       <>
-      <Navbar className="my-2" color="dark" dark>
+      <Navbar className="my-2">
         <NavbarBrand href="/">
           <img
-            alt="logo"
-            src="../assets/logo_transparent.svg"
+            alt="logo_transparent"
+            src= {logo_transparent}
             style={{
-              height: 40,
-              width: 40
+              height: 90,
+              width: 90
             }}
           />
         </NavbarBrand>
       </Navbar>
-        <Container>
+        <Container className="d-flex flex-column-reverse">
         <br />
           <Button color="success" onClick={()=>this.mostrarModalInsertar()}>Crear</Button>
           <br />
@@ -209,7 +209,7 @@ class App extends React.Component {
               </label>
               <input
                 className="form-control"
-                name="nombreproducto"
+                name="nombre"
                 type="text"
                 onChange={this.handleChange}
                 value={this.state.form.nombre}
@@ -222,7 +222,7 @@ class App extends React.Component {
               </label>
               <input
                 className="form-control"
-                name="descripcionproducto"
+                name="descripcion"
                 type="text"
                 onChange={this.handleChange}
                 value={this.state.form.descripcion}
@@ -235,7 +235,7 @@ class App extends React.Component {
               </label>
               <input
                 className="form-control"
-                name="precio"
+                name="valor_unitario"
                 type="text"
                 onChange={this.handleChange}
                 value={this.state.form.valor_unitario}
@@ -325,7 +325,7 @@ class App extends React.Component {
               </label>
               <input
                 className="form-control"
-                name="nombreproducto"
+                name="nombre"
                 type="text"
                 onChange={this.handleChange}
               />
@@ -337,7 +337,7 @@ class App extends React.Component {
               </label>
               <input
                 className="form-control"
-                name="descripcionproducto"
+                name="descripcion"
                 type="text"
                 onChange={this.handleChange}
               />
@@ -349,7 +349,7 @@ class App extends React.Component {
               </label>
               <input
                 className="form-control"
-                name="precio"
+                name="valor_unitario"
                 type="text"
                 onChange={this.handleChange}
               />

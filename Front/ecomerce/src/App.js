@@ -15,11 +15,6 @@ import {
   NavbarBrand
 } from "reactstrap";
 
-const data = [
-  { id: 1, nombreproducto: "Jarron de barro", descripcionproducto: "Este es un Jarron de barro de prueba" , precio: "200.000"},
-  { id: 2, nombreproducto: "Manilla", descripcionproducto: "Las manillas son muy representativas de la region" , precio: "20.000"},
-  { id: 3, nombreproducto: "Collar de palma", descripcionproducto: "Este collar es realizado por los artesanos de colombia" , precio: "50.000"}
-];
 
 class App extends React.Component {
 
@@ -29,22 +24,30 @@ class App extends React.Component {
     modalInsertar: false,
     form: {
       id: "",
-      nombreproducto: "",
-      descripcionproducto: "",
-      precio: "",
+      nombre: "",
+      descripcion: "",
+      valor_unitario: "",
+      ean: "",
+      marca: "",
+      imagen: "",
     },
   };
-
+  componentDidMount(){
+    this.loadData()
+  }
   loadData() {
-    fetch('https://localhost:35729/productos')
+    fetch('http://localhost:8080/api/productos')
       .then(response => response.json())
       .then(data => {
         const productos = data.map(item => {
           return {
             id: item.id,
-            nombreproducto: item.nombreproducto,
-            descripcionproducto: item.descripcionproducto,
-            precio: item.precio
+            nombre: item.nombre,
+            descripcion: item.descripcion,
+            valor_unitario: item.valor_unitario,
+            ean: item.ean,
+            marca: item.marca,
+            imagen:item.imagen
           };
         });
         this.setState({ data }); // Se actualiza el estado con los datos obtenidos
@@ -77,9 +80,12 @@ class App extends React.Component {
     var arreglo = this.state.data;
     arreglo.map((registro) => {
       if (dato.id === registro.id) {
-        arreglo[contador].nombreproducto = dato.nombreproducto;
-        arreglo[contador].descripcionproducto = dato.descripcionproducto;
-        arreglo[contador].precio = dato.precio;
+        arreglo[contador].nombre = dato.nombre;
+        arreglo[contador].descripcion = dato.descripcion;
+        arreglo[contador].valor_unitario = dato.valor_unitario;
+        arreglo[contador].ean = dato.ean;
+        arreglo[contador].marca = dato.marca;
+        arreglo[contador].imagen = dato.imagen;
       }
       contador++;
     });
@@ -146,6 +152,9 @@ class App extends React.Component {
                 <th>Nombre del producto</th>
                 <th>Descripción del producto</th>
                 <th>Precio</th>
+                <th>Ean</th>
+                <th>Marca</th>
+                <th>Imágen</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -154,9 +163,12 @@ class App extends React.Component {
               {this.state.data.map((dato) => (
                 <tr key={dato.id}>
                   <td>{dato.id}</td>
-                  <td>{dato.nombreproducto}</td>
-                  <td>{dato.descripcionproducto}</td>
-                  <td>{dato.precio}</td>
+                  <td>{dato.nombre}</td>
+                  <td>{dato.descripcion}</td>
+                  <td>{dato.valor_unitario}</td>
+                  <td>{dato.ean}</td>
+                  <td>{dato.marca}</td>
+                  <td>{dato.imagen}</td>
                   <td>
                     <Button
                       color="primary"
@@ -200,7 +212,7 @@ class App extends React.Component {
                 name="nombreproducto"
                 type="text"
                 onChange={this.handleChange}
-                value={this.state.form.nombreproducto}
+                value={this.state.form.nombre}
               />
             </FormGroup>
             
@@ -213,7 +225,7 @@ class App extends React.Component {
                 name="descripcionproducto"
                 type="text"
                 onChange={this.handleChange}
-                value={this.state.form.descripcionproducto}
+                value={this.state.form.descripcion}
               />
             </FormGroup>
 
@@ -226,9 +238,48 @@ class App extends React.Component {
                 name="precio"
                 type="text"
                 onChange={this.handleChange}
-                value={this.state.form.precio}
+                value={this.state.form.valor_unitario}
               />
             </FormGroup>
+            <FormGroup>
+              <label>
+              Ean: 
+              </label>
+              <input
+                className="form-control"
+                name="ean"
+                type="text"
+                onChange={this.handleChange}
+                value={this.state.form.ean}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <label>
+              Marca del producto: 
+              </label>
+              <input
+                className="form-control"
+                name="marca"
+                type="text"
+                onChange={this.handleChange}
+                value={this.state.form.marca}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <label>
+              Imágen: 
+              </label>
+              <input
+                className="form-control"
+                name="imagen"
+                type="text"
+                onChange={this.handleChange}
+                value={this.state.form.imagen}
+              />
+            </FormGroup>
+
           </ModalBody>
 
           <ModalFooter>
@@ -303,6 +354,43 @@ class App extends React.Component {
                 onChange={this.handleChange}
               />
             </FormGroup>
+
+            <FormGroup>
+              <label>
+              Ean: 
+              </label>
+              <input
+                className="form-control"
+                name="ean"
+                type="text"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <label>
+              Marca del producto: 
+              </label>
+              <input
+                className="form-control"
+                name="marca"
+                type="text"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <label>
+              Imágen: 
+              </label>
+              <input
+                className="form-control"
+                name="imagen"
+                type="text"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+
           </ModalBody>
 
           <ModalFooter>

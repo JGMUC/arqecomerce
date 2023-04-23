@@ -41,4 +41,7 @@ public class Product {
     
     @Column(name = "prd_imagen")
     private String imagen; 
+
+    @Column(name = "imagenes")
+    private String imagenes;
 }

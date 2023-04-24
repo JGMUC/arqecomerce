@@ -1,5 +1,5 @@
 import logo_transparent from "./assets/logo_transparent.png";
-import React from "react";
+import React, { useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
@@ -22,6 +22,7 @@ class App extends React.Component {
     data: [], //para mirar el JSON de arriba cambiar por data
     modalActualizar: false,
     modalInsertar: false,
+    modalComentario: false,
     form: {
       id: "",
       nombre: "",
@@ -32,7 +33,7 @@ class App extends React.Component {
       imagen: "",
     },
   };
-  componentDidMount(){
+  componentDidMount() {
     this.loadData()
   }
   loadData() {
@@ -47,7 +48,7 @@ class App extends React.Component {
             valor_unitario: item.valor_unitario,
             ean: item.ean,
             marca: item.marca,
-            imagen:item.imagen
+            imagen: item.imagen
           };
         });
         this.setState({ data }); // Se actualiza el estado con los datos obtenidos
@@ -75,6 +76,16 @@ class App extends React.Component {
     this.setState({ modalInsertar: false });
   };
 
+  mostrarModalComentario = () => {
+    this.setState({
+      modalComentario: true,
+    });
+  };
+
+  cerrarModalInsertar = () => {
+    this.setState({ modalComentario: false });
+  };
+
   editar = (dato) => {
     var contador = 0;
     var arreglo = this.state.data;
@@ -93,7 +104,7 @@ class App extends React.Component {
   };
 
   eliminar = (dato) => {
-    var opcion = window.confirm("Estás Seguro que deseas Eliminar el elemento "+dato.id);
+    var opcion = window.confirm("Estás Seguro que deseas Eliminar el elemento " + dato.id);
     if (opcion === true) {
       var contador = 0;
       var arreglo = this.state.data;
@@ -107,13 +118,28 @@ class App extends React.Component {
     }
   };
 
-  insertar= ()=>{
-    var valorNuevo= {...this.state.form};
-    valorNuevo.id=this.state.data.length+1;
-    var lista= this.state.data;
+  insertar = () => {
+    var valorNuevo = { ...this.state.form };
+    valorNuevo.id = this.state.data.length + 1;
+    var lista = this.state.data;
     lista.push(valorNuevo);
     this.setState({ modalInsertar: false, data: lista });
   }
+
+  insertarComentario = () => {
+    console.log("this.state.data;",this.state.data)
+    // var valorNuevo = { ...this.state.form };
+    // valorNuevo.id = this.state.data.length + 1;
+    // var lista = this.state.data;
+    // lista.push(valorNuevo);
+    this.setState(this.cerrarModalInsertar());
+  }
+
+  handleSearch = (value) => {
+    var [searchTerm, setSearchTerm] = useState("");
+    setSearchTerm(value);
+    // aquí puedes hacer algo con la búsqueda, como enviarla a un servidor o actualizar una lista de resultados
+  };
 
   handleChange = (e) => {
     this.setState({
@@ -125,24 +151,35 @@ class App extends React.Component {
   };
 
   render() {
-    
+
     return (
       <>
-      <Navbar className="my-2">
-        <NavbarBrand href="/">
-          <img
-            alt="logo_transparent"
-            src= {logo_transparent}
-            style={{
-              height: 90,
-              width: 90
-            }}
-          />
-        </NavbarBrand>
-      </Navbar>
+        <Navbar className="my-2">
+          <NavbarBrand href="/">
+            <img
+              alt="logo_transparent"
+              src={logo_transparent}
+              style={{
+                height: 90,
+                width: 90
+              }}
+            />
+          </NavbarBrand>
+        </Navbar>
         <Container className="d-flex flex-column-reverse">
-        <br />
-          <Button color="success" onClick={()=>this.mostrarModalInsertar()}>Crear</Button>
+          <div>
+            <form>
+              <input
+                type="text"
+                placeholder="Buscar..."
+                onChange={(e) => this.handleSearch(e.target.value)}
+              />
+            </form>
+          </div>
+        </Container>
+        <Container className="d-flex flex-column-reverse">
+          <br />
+          <Button color="success" onClick={() => this.mostrarModalInsertar()}>Crear</Button>
           <br />
           <br />
           <Table>
@@ -170,13 +207,9 @@ class App extends React.Component {
                   <td>{dato.marca}</td>
                   <td>{dato.imagen}</td>
                   <td>
-                    <Button
-                      color="primary"
-                      onClick={() => this.mostrarModalActualizar(dato)}
-                    >
-                      Editar
-                    </Button>{" "}
-                    <Button color="danger" onClick={()=> this.eliminar(dato)}>Eliminar</Button>
+                    <Button color="primary" onClick={() => this.mostrarModalComentario(dato)}>Comentarios</Button>{" "}
+                    <Button color="primary" onClick={() => this.mostrarModalActualizar(dato)}>Editar</Button>{" "}
+                    <Button color="danger" onClick={() => this.eliminar(dato)}>Eliminar</Button>
                   </td>
                 </tr>
               ))}
@@ -186,15 +219,15 @@ class App extends React.Component {
 
         <Modal isOpen={this.state.modalActualizar}>
           <ModalHeader>
-           <div><h3>Editar Registro</h3></div>
+            <div><h3>Editar Registro</h3></div>
           </ModalHeader>
 
           <ModalBody>
             <FormGroup>
               <label>
-               Id:
+                Id:
               </label>
-            
+
               <input
                 className="form-control"
                 readOnly
@@ -202,10 +235,10 @@ class App extends React.Component {
                 value={this.state.form.id}
               />
             </FormGroup>
-            
+
             <FormGroup>
               <label>
-              Nombre del producto: 
+                Nombre del producto:
               </label>
               <input
                 className="form-control"
@@ -215,10 +248,10 @@ class App extends React.Component {
                 value={this.state.form.nombre}
               />
             </FormGroup>
-            
+
             <FormGroup>
               <label>
-              Descripción del producto: 
+                Descripción del producto:
               </label>
               <input
                 className="form-control"
@@ -231,7 +264,7 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
-              Precio del producto: 
+                Precio del producto:
               </label>
               <input
                 className="form-control"
@@ -243,7 +276,7 @@ class App extends React.Component {
             </FormGroup>
             <FormGroup>
               <label>
-              Ean: 
+                Ean:
               </label>
               <input
                 className="form-control"
@@ -256,7 +289,7 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
-              Marca del producto: 
+                Marca del producto:
               </label>
               <input
                 className="form-control"
@@ -269,7 +302,7 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
-              Imágen: 
+                Imágen:
               </label>
               <input
                 className="form-control"
@@ -302,26 +335,26 @@ class App extends React.Component {
 
         <Modal isOpen={this.state.modalInsertar}>
           <ModalHeader>
-           <div><h3>Insertar nombre del producto</h3></div>
+            <div><h3>Insertar nombre del producto</h3></div>
           </ModalHeader>
 
           <ModalBody>
             <FormGroup>
               <label>
-                Id: 
+                Id:
               </label>
-              
+
               <input
                 className="form-control"
                 readOnly
                 type="text"
-                value={this.state.data.length+1}
+                value={this.state.data.length + 1}
               />
             </FormGroup>
-            
+
             <FormGroup>
               <label>
-              Nombre del producto: 
+                Nombre del producto:
               </label>
               <input
                 className="form-control"
@@ -330,10 +363,10 @@ class App extends React.Component {
                 onChange={this.handleChange}
               />
             </FormGroup>
-            
+
             <FormGroup>
               <label>
-              Descripción del producto: 
+                Descripción del producto:
               </label>
               <input
                 className="form-control"
@@ -342,10 +375,10 @@ class App extends React.Component {
                 onChange={this.handleChange}
               />
             </FormGroup>
-                
+
             <FormGroup>
               <label>
-              Precio del producto: 
+                Precio del producto:
               </label>
               <input
                 className="form-control"
@@ -357,7 +390,7 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
-              Ean: 
+                Ean:
               </label>
               <input
                 className="form-control"
@@ -369,7 +402,7 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
-              Marca del producto: 
+                Marca del producto:
               </label>
               <input
                 className="form-control"
@@ -381,7 +414,7 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
-              Imágen: 
+                Imágen:
               </label>
               <input
                 className="form-control"
@@ -408,6 +441,41 @@ class App extends React.Component {
             </Button>
           </ModalFooter>
         </Modal>
+
+        <Modal isOpen={this.state.modalComentario}>
+          <ModalHeader>
+            <div><h3>Comentario del producto</h3></div>
+          </ModalHeader>
+          <ModalBody>
+            <FormGroup>
+              <label>
+                Comentario del producto:
+              </label>
+              <input
+                className="form-control"
+                name="comentario"
+                type="text"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              color="primary"
+              onClick={() => this.insertarComentario()}
+            >
+              Agregar comentario
+            </Button>
+            <Button
+              className="btn btn-danger"
+              onClick={() => this.cerrarModalComentario()}
+            >
+              Cancelar
+            </Button>
+          </ModalFooter>
+        </Modal>
+
       </>
     );
   }

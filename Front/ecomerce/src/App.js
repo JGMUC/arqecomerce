@@ -1,5 +1,5 @@
 import logo_transparent from "./assets/logo_transparent.png";
-import React from "react";
+import React , { useState } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
@@ -17,7 +17,6 @@ import {
 
 
 class App extends React.Component {
-
   state = {
     data: [], //para mirar el JSON de arriba cambiar por data
     modalActualizar: false,
@@ -115,6 +114,12 @@ class App extends React.Component {
     this.setState({ modalInsertar: false, data: lista });
   }
 
+  handleSearch = (value) => {
+    var [searchTerm, setSearchTerm] = useState("");
+    setSearchTerm(value);
+    // aquí puedes hacer algo con la búsqueda, como enviarla a un servidor o actualizar una lista de resultados
+  };
+
   handleChange = (e) => {
     this.setState({
       form: {
@@ -125,7 +130,7 @@ class App extends React.Component {
   };
 
   render() {
-    
+
     return (
       <>
       <Navbar className="my-2">
@@ -140,6 +145,17 @@ class App extends React.Component {
           />
         </NavbarBrand>
       </Navbar>
+      <Container className="d-flex flex-column-reverse">
+        <div>
+          <form>
+            <input
+              type="text"
+              placeholder="Buscar..."
+              onChange={(e) => this.handleSearch(e.target.value)}
+            />
+          </form>
+        </div>
+      </Container>
         <Container className="d-flex flex-column-reverse">
         <br />
           <Button color="success" onClick={()=>this.mostrarModalInsertar()}>Crear</Button>

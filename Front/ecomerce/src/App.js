@@ -32,6 +32,7 @@ class App extends React.Component {
       valor_unitario: "",
       ean: "",
       marca: "",
+      cantidad: "",
       imagen: "",
     },
   };
@@ -40,23 +41,13 @@ class App extends React.Component {
     this.loadData()
   }
 
-  loadData() {
-    fetch('http://localhost:8080/api/productos')
-      .then(response => response.json())
-      .then(data => {
-        const productos = data.map(item => {
-          return {
-            id: item.id,
-            nombre: item.nombre,
-            descripcion: item.descripcion,
-            valor_unitario: item.valor_unitario,
-            ean: item.ean,
-            marca: item.marca,
-            imagen: item.imagen
-          };
-        });
-        this.setState({ data }); // Se actualiza el estado con los datos obtenidos
-      });
+  loadData(){
+    axios.get("http://localhost:8080/api/productos")
+      .then(response => 
+        response.data)
+      .then(data => { 
+        this.setState({ data });
+    });
   }
 
   mostrarModalActualizar = (dato) => {
@@ -80,10 +71,6 @@ class App extends React.Component {
     this.setState({ modalInsertar: false });
   };
 
-  cerrarModalInsertar = () => {
-    this.setState({ modalComentario: false });
-  };
-
   mostrarModalComentario = () => {
     this.setState({
       modalComentario: true,
@@ -95,58 +82,34 @@ class App extends React.Component {
   };
 
   editar = (dato) => {
-    var contador = 0;
-    var arreglo = this.state.data;
-    arreglo.map((registro) => {
-      if (dato.id === registro.id) {
-        arreglo[contador].nombre = dato.nombre;
-        arreglo[contador].descripcion = dato.descripcion;
-        arreglo[contador].valor_unitario = dato.valor_unitario;
-        arreglo[contador].ean = dato.ean;
-        arreglo[contador].marca = dato.marca;
-        arreglo[contador].imagen = dato.imagen;
-      }
-      contador++;
+    axios.put("http://localhost:8080/api/productos/" + dato.id, dato).then(() => {
+        this.loadData();
     });
-    this.setState({ data: arreglo, modalActualizar: false });
+    this.setState({ modalActualizar: false });
   };
 
   eliminar = (dato) => {
     var opcion = window.confirm("Estás Seguro que deseas Eliminar el elemento " + dato.id);
-    if (opcion === true) {
-      var contador = 0;
-      var arreglo = this.state.data;
-      arreglo.map((registro) => {
-        if (dato.id === registro.id) {
-          arreglo.splice(contador, 1);
-        }
-        contador++;
-      });
-      this.setState({ data: arreglo, modalActualizar: false });
-    }
+    axios.delete("http://localhost:8080/api/productos/" + dato.id).then(() => {
+      this.loadData();
+    });
   };
 
   insertar = () => {
     var valorNuevo = { ...this.state.form };
-    valorNuevo.id = this.state.data.length + 1;
-    var lista = this.state.data;
-    lista.push(valorNuevo);
-    this.setState({ modalInsertar: false, data: lista });
-  }
-
-  insertarComentario = () => {
-    console.log("this.state.data;",this.state.data)
-    // var valorNuevo = { ...this.state.form };
-    // valorNuevo.id = this.state.data.length + 1;
-    // var lista = this.state.data;
-    // lista.push(valorNuevo);
-    this.setState(this.cerrarModalInsertar());
+    delete valorNuevo.id
+    axios.post("http://localhost:8080/api/productos", valorNuevo).then(() => {
+        this.loadData();
+    });
   }
 
   handleSearch = (value) => {
-    var [searchTerm, setSearchTerm] = useState("");
-    setSearchTerm(value);
-    // aquí puedes hacer algo con la búsqueda, como enviarla a un servidor o actualizar una lista de resultados
+    axios.get("http://localhost:8080/api/productos",value)
+      .then(response => 
+        response.data)
+      .then(data => { 
+        this.setState({ data });
+    });
   };
 
   handleChange = (e) => {
@@ -158,18 +121,6 @@ class App extends React.Component {
     });
   };
 
-
-
-  componentDidMount() {
-    this.obtenerProductos();
-  }
-
-  obtenerProductos() {
-    axios.get("http://localhost:8080/api/productos").then((res) => {
-      this.setState({ productos: res.data });
-    });
-  }
-
   seleccionarProducto = (producto) => {
     this.setState({
       id: producto.id,
@@ -178,183 +129,29 @@ class App extends React.Component {
       valorunitario: producto.valorunitario,
       ean: producto.ean,
       marca: producto.marca,
+      cantidad: producto.cantidad,
       imagen: producto.imagen
     });
   };
 
-  handleChange = (event) => {
-    const target = event.target;
-    const value = target.value;
-    const name = target.name;
+  insertarComentario = () => {
+    console.log("this.state.data;",this.state)
+    this.setState(this.cerrarModalComentario());
+  }
 
-    this.setState({
-      [name]: value,
-    });
-  };
+  agregarComentario = () => {
+    const comentarios = [...this.state.comentarios];
 
-  handleSubmit = (event) => {
-    event.preventDefault();
-
-    const producto = {
-      id: this.state.id,
-      nombre: this.state.nombre,
-      descripcion: this.state.descripcion,
-      valorunitario: this.state.valorunitario,
-      ean: this.state.ean,
-      marca: this.state.marca,
-      imagen: this.state.imagen
-    };
-
-    if (producto.id === 0) {
-      axios.post("http://localhost:8080/api/productos", producto).then(() => {
-        this.obtenerProductos();
-      });
-    } else {
-      axios.put("http://localhost:8080/api/productos" + producto.id, producto).then(() => {
-        this.obtenerProductos();
-      });
-    }
-
-    this.limpiarFormulario();
-  };
-
-  limpiarFormulario = () => {
-    this.setState({
-      id: 0,
-      nombre: "",
-      descripcion: "",
-      valorunitario: "",
-      ean: "",
-      marca: "",
-      imagen: "",
-    });
-  };
-
-  eliminarProducto = (id) => {
-    axios.delete("http://localhost:8080/api/productos" + id).then(() => {
-      this.obtenerProductos();
-    });
-  };
-
-  agregarComentario = (comentario) => {
-    const comentarios = [...this.state.comentarios, comentario];
-
-    axios
-      .put("http://localhost:8080/api/productos" + this.state.id, {
+    axios.put("http://localhost:8080/api/comentarios" + this.state.id, {
         comentarios: comentarios,
       })
       .then(() => {
-        this.obtenerProductos();
+        this.loadData();
       });
   };
 
-
-
-
-
-
-
-
-
-
-
-
   render() {
-    const { productos, comentarios } = this.state;
-
-//     return (
-//       <div>
-//         <h1>Lista de Productos</h1>
-//         <table>
-//           <thead>
-//             <tr>
-//               <th>Nombre</th>
-//               <th>Descripción</th>
-//               <th>Valor Unitario</th>
-//               <th>EAN</th>
-//               <th>Marca</th>
-//               <th>Imagen</th>
-//               <th>Acciones</th>
-//             </tr>
-//           </thead>
-//           <tbody>
-//             {productos.map((producto) => (
-//               <tr key={producto.id}>
-//                 <td>{producto.nombre}</td>
-//                 <td>{producto.descripcion}</td>
-//                 <td>{producto.valorunitario}</td>
-//                 <td>{producto.ean}</td>
-//                 <td>{producto.marca}</td>
-//             <td>
-//               <img src={producto.imagen} alt={producto.nombre} />
-//             </td>
-//             <td>
-//               <button onClick={() => this.seleccionarProducto(producto)}>Editar</button>
-//               <button onClick={() => this.eliminarProducto(producto.id)}>Eliminar</button>
-//             </td>
-//           </tr>
-//         ))}
-//       </tbody>
-//     </table>
-
-//     <h2>{this.state.id === 0 ? "Agregar Producto" : "Editar Producto"}</h2>
-//     <form onSubmit={this.handleSubmit}>
-//       <label>
-//         Nombre:
-//         <input type="text" name="nombre" value={this.state.nombre} onChange={this.handleChange} />
-//       </label>
-//       <br />
-//       <label>
-//         Descripción:
-//         <textarea name="descripcion" value={this.state.descripcion} onChange={this.handleChange}></textarea>
-//       </label>
-//       <br />
-//       <label>
-//         Valor Unitario:
-//         <input type="number" name="valorunitario" value={this.state.valorunitario} onChange={this.handleChange} />
-//       </label>
-//       <br />
-//       <label>
-//         EAN:
-//         <input type="text" name="ean" value={this.state.ean} onChange={this.handleChange} />
-//       </label>
-//       <br />
-//       <label>
-//         Marca:
-//         <input type="text" name="marca" value={this.state.marca} onChange={this.handleChange} />
-//       </label>
-//       <br />
-//       <label>
-//         Imagen:
-//         <input type="text" name="imagen" value={this.state.imagen} onChange={this.handleChange} />
-//       </label>
-//       <br />
-//       <button type="submit">{this.state.id === 0 ? "Agregar" : "Actualizar"}</button>
-//       <button type="button" onClick={this.limpiarFormulario}>
-//         Limpiar
-//       </button>
-//     </form>
-
-//     <h2>Comentarios</h2>
-//     <ul>
-//       {comentarios.map((comentario, index) => (
-//         <li key={index}>{comentario}</li>
-//       ))}
-//     </ul>
-//     <form onSubmit={(event) => {
-//       event.preventDefault();
-//       this.agregarComentario(this.state.comentario);
-//       this.setState({ comentario: "" });
-//     }}>
-//       <label>
-//         Comentario:
-//         <input type="text" name="comentario" value={this.state.comentario} onChange={this.handleChange} />
-//       </label>
-//       <br />
-//       <button type="submit">Agregar Comentario</button>
-//     </form>
-//   </div>
-// );
+    // const { productos, comentarios } = this.state;
 
     return (
       <>
@@ -395,6 +192,7 @@ class App extends React.Component {
                 <th>Precio</th>
                 <th>Ean</th>
                 <th>Marca</th>
+                <th>Cantidad</th>
                 <th>Imágen</th>
                 <th>Acción</th>
               </tr>
@@ -409,6 +207,7 @@ class App extends React.Component {
                   <td>{dato.valor_unitario}</td>
                   <td>{dato.ean}</td>
                   <td>{dato.marca}</td>
+                  <td>{dato.cantidad}</td>
                   <td>{dato.imagen}</td>
                   <td>
                     <Button color="primary" onClick={() => this.mostrarModalComentario(dato)}>Comentarios</Button>{" "}
@@ -506,6 +305,19 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
+              Cantidad del producto:
+              </label>
+              <input
+                className="form-control"
+                name="cantidad"
+                type="text"
+                onChange={this.handleChange}
+                value={this.state.form.cantidad}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <label>
                 Imágen:
               </label>
               <input
@@ -543,18 +355,6 @@ class App extends React.Component {
           </ModalHeader>
 
           <ModalBody>
-            <FormGroup>
-              <label>
-                Id:
-              </label>
-
-              <input
-                className="form-control"
-                readOnly
-                type="text"
-                value={this.state.data.length + 1}
-              />
-            </FormGroup>
 
             <FormGroup>
               <label>
@@ -618,6 +418,18 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
+                Cantidad del producto:
+              </label>
+              <input
+                className="form-control"
+                name="cantidad"
+                type="text"
+                onChange={this.handleChange}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <label>
                 Imágen:
               </label>
               <input
@@ -662,18 +474,6 @@ class App extends React.Component {
               ))}
             </ul> */}
             <FormGroup>
-              {/* <form onSubmit={(event) => {
-                event.preventDefault();
-                this.agregarComentario(this.state.comentario);
-                this.setState({ comentario: "" });
-              }}>
-                <label>
-                  Comentario:
-                  <input type="text" name="comentario" value={this.state.comentario} onChange={this.handleChange} />
-                </label>
-                <br />
-                <button type="submit">Agregar Comentario</button>
-              </form> */}
               <label>
                 Comentario del producto:
               </label>
@@ -689,7 +489,7 @@ class App extends React.Component {
           <ModalFooter>
             <Button
               color="primary"
-              onClick={() => this.insertarComentario()}
+              onClick={() => this.agregarComentario()}
             >
               Agregar comentario
             </Button>

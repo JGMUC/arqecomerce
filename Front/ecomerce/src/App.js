@@ -1,5 +1,6 @@
 import logo_transparent from "./assets/logo_transparent.png";
 import React, { useState } from "react";
+import axios from "axios";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import {
@@ -20,6 +21,7 @@ class App extends React.Component {
 
   state = {
     data: [], //para mirar el JSON de arriba cambiar por data
+    comentarios: [], //para mirar el JSON de arriba cambiar por data
     modalActualizar: false,
     modalInsertar: false,
     modalComentario: false,
@@ -33,9 +35,11 @@ class App extends React.Component {
       imagen: "",
     },
   };
+
   componentDidMount() {
     this.loadData()
   }
+
   loadData() {
     fetch('http://localhost:8080/api/productos')
       .then(response => response.json())
@@ -76,13 +80,17 @@ class App extends React.Component {
     this.setState({ modalInsertar: false });
   };
 
+  cerrarModalInsertar = () => {
+    this.setState({ modalComentario: false });
+  };
+
   mostrarModalComentario = () => {
     this.setState({
       modalComentario: true,
     });
   };
 
-  cerrarModalInsertar = () => {
+  cerrarModalComentario = () => {
     this.setState({ modalComentario: false });
   };
 
@@ -150,7 +158,203 @@ class App extends React.Component {
     });
   };
 
+
+
+  componentDidMount() {
+    this.obtenerProductos();
+  }
+
+  obtenerProductos() {
+    axios.get("http://localhost:8080/api/productos").then((res) => {
+      this.setState({ productos: res.data });
+    });
+  }
+
+  seleccionarProducto = (producto) => {
+    this.setState({
+      id: producto.id,
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      valorunitario: producto.valorunitario,
+      ean: producto.ean,
+      marca: producto.marca,
+      imagen: producto.imagen
+    });
+  };
+
+  handleChange = (event) => {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
+
+    this.setState({
+      [name]: value,
+    });
+  };
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+
+    const producto = {
+      id: this.state.id,
+      nombre: this.state.nombre,
+      descripcion: this.state.descripcion,
+      valorunitario: this.state.valorunitario,
+      ean: this.state.ean,
+      marca: this.state.marca,
+      imagen: this.state.imagen
+    };
+
+    if (producto.id === 0) {
+      axios.post("http://localhost:8080/api/productos", producto).then(() => {
+        this.obtenerProductos();
+      });
+    } else {
+      axios.put("http://localhost:8080/api/productos" + producto.id, producto).then(() => {
+        this.obtenerProductos();
+      });
+    }
+
+    this.limpiarFormulario();
+  };
+
+  limpiarFormulario = () => {
+    this.setState({
+      id: 0,
+      nombre: "",
+      descripcion: "",
+      valorunitario: "",
+      ean: "",
+      marca: "",
+      imagen: "",
+    });
+  };
+
+  eliminarProducto = (id) => {
+    axios.delete("http://localhost:8080/api/productos" + id).then(() => {
+      this.obtenerProductos();
+    });
+  };
+
+  agregarComentario = (comentario) => {
+    const comentarios = [...this.state.comentarios, comentario];
+
+    axios
+      .put("http://localhost:8080/api/productos" + this.state.id, {
+        comentarios: comentarios,
+      })
+      .then(() => {
+        this.obtenerProductos();
+      });
+  };
+
+
+
+
+
+
+
+
+
+
+
+
   render() {
+    const { productos, comentarios } = this.state;
+
+//     return (
+//       <div>
+//         <h1>Lista de Productos</h1>
+//         <table>
+//           <thead>
+//             <tr>
+//               <th>Nombre</th>
+//               <th>Descripción</th>
+//               <th>Valor Unitario</th>
+//               <th>EAN</th>
+//               <th>Marca</th>
+//               <th>Imagen</th>
+//               <th>Acciones</th>
+//             </tr>
+//           </thead>
+//           <tbody>
+//             {productos.map((producto) => (
+//               <tr key={producto.id}>
+//                 <td>{producto.nombre}</td>
+//                 <td>{producto.descripcion}</td>
+//                 <td>{producto.valorunitario}</td>
+//                 <td>{producto.ean}</td>
+//                 <td>{producto.marca}</td>
+//             <td>
+//               <img src={producto.imagen} alt={producto.nombre} />
+//             </td>
+//             <td>
+//               <button onClick={() => this.seleccionarProducto(producto)}>Editar</button>
+//               <button onClick={() => this.eliminarProducto(producto.id)}>Eliminar</button>
+//             </td>
+//           </tr>
+//         ))}
+//       </tbody>
+//     </table>
+
+//     <h2>{this.state.id === 0 ? "Agregar Producto" : "Editar Producto"}</h2>
+//     <form onSubmit={this.handleSubmit}>
+//       <label>
+//         Nombre:
+//         <input type="text" name="nombre" value={this.state.nombre} onChange={this.handleChange} />
+//       </label>
+//       <br />
+//       <label>
+//         Descripción:
+//         <textarea name="descripcion" value={this.state.descripcion} onChange={this.handleChange}></textarea>
+//       </label>
+//       <br />
+//       <label>
+//         Valor Unitario:
+//         <input type="number" name="valorunitario" value={this.state.valorunitario} onChange={this.handleChange} />
+//       </label>
+//       <br />
+//       <label>
+//         EAN:
+//         <input type="text" name="ean" value={this.state.ean} onChange={this.handleChange} />
+//       </label>
+//       <br />
+//       <label>
+//         Marca:
+//         <input type="text" name="marca" value={this.state.marca} onChange={this.handleChange} />
+//       </label>
+//       <br />
+//       <label>
+//         Imagen:
+//         <input type="text" name="imagen" value={this.state.imagen} onChange={this.handleChange} />
+//       </label>
+//       <br />
+//       <button type="submit">{this.state.id === 0 ? "Agregar" : "Actualizar"}</button>
+//       <button type="button" onClick={this.limpiarFormulario}>
+//         Limpiar
+//       </button>
+//     </form>
+
+//     <h2>Comentarios</h2>
+//     <ul>
+//       {comentarios.map((comentario, index) => (
+//         <li key={index}>{comentario}</li>
+//       ))}
+//     </ul>
+//     <form onSubmit={(event) => {
+//       event.preventDefault();
+//       this.agregarComentario(this.state.comentario);
+//       this.setState({ comentario: "" });
+//     }}>
+//       <label>
+//         Comentario:
+//         <input type="text" name="comentario" value={this.state.comentario} onChange={this.handleChange} />
+//       </label>
+//       <br />
+//       <button type="submit">Agregar Comentario</button>
+//     </form>
+//   </div>
+// );
 
     return (
       <>
@@ -447,7 +651,29 @@ class App extends React.Component {
             <div><h3>Comentario del producto</h3></div>
           </ModalHeader>
           <ModalBody>
+            {this.state.comentarios.map((dato) => (
+                <tr key={dato.comentario}>
+                  <td>{dato.comentario}</td>
+                </tr>
+            ))}
+            {/* <ul>
+              {comentarios.map((comentario, index) => (
+                <li key={index}>{comentario}</li>
+              ))}
+            </ul> */}
             <FormGroup>
+              {/* <form onSubmit={(event) => {
+                event.preventDefault();
+                this.agregarComentario(this.state.comentario);
+                this.setState({ comentario: "" });
+              }}>
+                <label>
+                  Comentario:
+                  <input type="text" name="comentario" value={this.state.comentario} onChange={this.handleChange} />
+                </label>
+                <br />
+                <button type="submit">Agregar Comentario</button>
+              </form> */}
               <label>
                 Comentario del producto:
               </label>

@@ -1,6 +1,7 @@
 package com.arqsoftware.ecomerce.model;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,5 +31,5 @@ public class Comentario {
     private String comentario;
     
     @Column(name = "com_fecha")
-    private Date fecha;
+    private Timestamp fecha;
 }

@@ -3,6 +3,10 @@ import React, { useState } from "react";
 import axios from "axios";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
+import AWS from 'aws-sdk';
+import Dropzone from 'react-dropzone';
+
+
 import {
   Table,
   Button,
@@ -16,9 +20,13 @@ import {
   NavbarBrand
 } from "reactstrap";
 
+AWS.config.update({
+  accessKeyId: 'AKIA2OYNDGIRT27UAPD6',
+  secretAccessKey: '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',
+});
 
 class App extends React.Component {
-
+  selectedFile
   state = {
     data: [], //para mirar el JSON de arriba cambiar por data
     comentarios: [], //para mirar el JSON de arriba cambiar por data
@@ -35,19 +43,37 @@ class App extends React.Component {
       cantidad: "",
       imagen: "",
     },
+    formComent: {
+      comentario: "",
+    },
   };
 
   componentDidMount() {
     this.loadData()
   }
+  uploadFileToS3 = (file) => {
+    const s3 = new AWS.S3();
+    const params = {
+      Bucket: 'arqsoftbucketjgmcdm',
+      Key: file.name,
+      Body: file,
+    };
 
-  loadData(){
-    axios.get("http://localhost:8080/api/productos")
-      .then(response => 
-        response.data)
-      .then(data => { 
-        this.setState({ data });
+    s3.upload(params, (err, data) => {
+      if (err) {
+        console.error(err);
+      } else {
+        console.log('Archivo cargado exitosamente:', data.Location);
+      }
     });
+  };
+  loadData() {
+    axios.get("http://localhost:8080/api/productos")
+      .then(response =>
+        response.data)
+      .then(data => {
+        this.setState({ data });
+      });
   }
 
   mostrarModalActualizar = (dato) => {
@@ -71,8 +97,10 @@ class App extends React.Component {
     this.setState({ modalInsertar: false });
   };
 
-  mostrarModalComentario = () => {
+  mostrarModalComentario = (dato) => {
+    this.loadDataComent(dato)
     this.setState({
+      form: dato,
       modalComentario: true,
     });
   };
@@ -83,7 +111,7 @@ class App extends React.Component {
 
   editar = (dato) => {
     axios.put("http://localhost:8080/api/productos/" + dato.id, dato).then(() => {
-        this.loadData();
+      this.loadData();
     });
     this.setState({ modalActualizar: false });
   };
@@ -98,24 +126,40 @@ class App extends React.Component {
   insertar = () => {
     var valorNuevo = { ...this.state.form };
     delete valorNuevo.id
+    valorNuevo.imagen = this.selectedFile.name
     axios.post("http://localhost:8080/api/productos", valorNuevo).then(() => {
-        this.loadData();
+      this.loadData();
     });
+    this.uploadFileToS3(this.selectedFile)
+    this.setState({ modalInsertar: false });
   }
 
   handleSearch = (value) => {
-    axios.get("http://localhost:8080/api/productos",value)
-      .then(response => 
+    axios.get("http://localhost:8080/api/productos/" + value)
+      .then(response =>
         response.data)
-      .then(data => { 
-        this.setState({ data });
-    });
+      .then(data => {
+        this.setState({ data: [data] });
+      });
   };
 
   handleChange = (e) => {
+    if (e.target.name === 'imagen') {
+      this.selectedFile = e.target.files[0];
+    } else {
+      this.setState({
+        form: {
+          ...this.state.form,
+          [e.target.name]: e.target.value,
+        },
+      });
+    }
+  }
+
+  handleChangeComentario = (e) => {
     this.setState({
-      form: {
-        ...this.state.form,
+      formComent: {
+        ...this.state.formComent,
         [e.target.name]: e.target.value,
       },
     });
@@ -135,23 +179,33 @@ class App extends React.Component {
   };
 
   insertarComentario = () => {
-    console.log("this.state.data;",this.state)
     this.setState(this.cerrarModalComentario());
   }
 
-  agregarComentario = () => {
-    const comentarios = [...this.state.comentarios];
-
-    axios.put("http://localhost:8080/api/comentarios" + this.state.id, {
-        comentarios: comentarios,
-      })
+  agregarComentario = (dato) => {
+    const comentarios = this.state.formComent.comentario
+    let newDate = new Date()
+    axios.post("http://localhost:8080/api/comentarios", {
+      idproducto: dato,
+      comentario: comentarios,
+      fecha: newDate,
+    })
       .then(() => {
         this.loadData();
       });
+    this.setState({ modalComentario: false });
   };
 
+  loadDataComent(dato) {
+    axios.get("http://localhost:8080/api/comentarios/" + dato.id)
+      .then(response =>
+        response.data)
+      .then(data => {
+        this.setState({ comentarios: data });
+      });
+  }
+
   render() {
-    // const { productos, comentarios } = this.state;
 
     return (
       <>
@@ -305,7 +359,7 @@ class App extends React.Component {
 
             <FormGroup>
               <label>
-              Cantidad del producto:
+                Cantidad del producto:
               </label>
               <input
                 className="form-control"
@@ -324,8 +378,7 @@ class App extends React.Component {
                 className="form-control"
                 name="imagen"
                 type="text"
-                onChange={this.handleChange}
-                value={this.state.form.imagen}
+                onChange={this.handleFileChange}
               />
             </FormGroup>
 
@@ -351,7 +404,7 @@ class App extends React.Component {
 
         <Modal isOpen={this.state.modalInsertar}>
           <ModalHeader>
-            <div><h3>Insertar nombre del producto</h3></div>
+            <div><h3>Insertar nuevo producto</h3></div>
           </ModalHeader>
 
           <ModalBody>
@@ -361,7 +414,7 @@ class App extends React.Component {
                 Nombre del producto:
               </label>
               <input
-                className="form-control"
+                className="form-control-small"
                 name="nombre"
                 type="text"
                 onChange={this.handleChange}
@@ -373,7 +426,7 @@ class App extends React.Component {
                 Descripción del producto:
               </label>
               <input
-                className="form-control"
+                className="form-control-small"
                 name="descripcion"
                 type="text"
                 onChange={this.handleChange}
@@ -385,7 +438,7 @@ class App extends React.Component {
                 Precio del producto:
               </label>
               <input
-                className="form-control"
+                className="form-control-small"
                 name="valor_unitario"
                 type="text"
                 onChange={this.handleChange}
@@ -397,7 +450,7 @@ class App extends React.Component {
                 Ean:
               </label>
               <input
-                className="form-control"
+                className="form-control-small"
                 name="ean"
                 type="text"
                 onChange={this.handleChange}
@@ -409,7 +462,7 @@ class App extends React.Component {
                 Marca del producto:
               </label>
               <input
-                className="form-control"
+                className="form-control-small"
                 name="marca"
                 type="text"
                 onChange={this.handleChange}
@@ -421,7 +474,7 @@ class App extends React.Component {
                 Cantidad del producto:
               </label>
               <input
-                className="form-control"
+                className="form-control-small"
                 name="cantidad"
                 type="text"
                 onChange={this.handleChange}
@@ -435,7 +488,8 @@ class App extends React.Component {
               <input
                 className="form-control"
                 name="imagen"
-                type="text"
+                type="file"
+                accept="image/*"
                 onChange={this.handleChange}
               />
             </FormGroup>
@@ -463,16 +517,20 @@ class App extends React.Component {
             <div><h3>Comentario del producto</h3></div>
           </ModalHeader>
           <ModalBody>
-            {this.state.comentarios.map((dato) => (
-                <tr key={dato.comentario}>
-                  <td>{dato.comentario}</td>
+            <Table>
+              <thead>
+                <tr>
+                  <th>Comentario</th>
                 </tr>
-            ))}
-            {/* <ul>
-              {comentarios.map((comentario, index) => (
-                <li key={index}>{comentario}</li>
-              ))}
-            </ul> */}
+              </thead>
+              <tbody>
+                {this.state.comentarios.map((dato) => (
+                  <tr key={dato.comentario}>
+                    <td>{dato.comentario}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
             <FormGroup>
               <label>
                 Comentario del producto:
@@ -481,7 +539,7 @@ class App extends React.Component {
                 className="form-control"
                 name="comentario"
                 type="text"
-                onChange={this.handleChange}
+                onChange={this.handleChangeComentario}
               />
             </FormGroup>
           </ModalBody>
@@ -489,7 +547,7 @@ class App extends React.Component {
           <ModalFooter>
             <Button
               color="primary"
-              onClick={() => this.agregarComentario()}
+              onClick={() => this.agregarComentario(this.state.form.id)}
             >
               Agregar comentario
             </Button>

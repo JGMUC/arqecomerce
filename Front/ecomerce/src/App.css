@@ -47,3 +47,11 @@ input[type="text"] {
     transform: rotate(360deg);
   }
 }
+
+.form-group-narrow {
+  margin-bottom: 3px; /* Puedes ajustar este valor según tu preferencia */
+}
+.form-control-small {
+  height: 30px; /* Puedes ajustar este valor según tu preferencia */
+  padding: 3px 6px; /* Puedes ajustar estos valores según tu preferencia */
+}

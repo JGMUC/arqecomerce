@@ -21,8 +21,8 @@ import {
 } from "reactstrap";
 
 AWS.config.update({
-  accessKeyId: 'AKIA2OYNDGIRT27UAPD6',
-  secretAccessKey: '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',
+  accessKeyId: `${process.env.REACT_APP_aki}`,
+  secretAccessKey: `${process.env.REACT_APP_sak}`,
 });
 
 class App extends React.Component {

@@ -55,3 +55,7 @@ input[type="text"] {
   height: 30px; /* Puedes ajustar este valor según tu preferencia */
   padding: 3px 6px; /* Puedes ajustar estos valores según tu preferencia */
 }
+.img-fixed-size {
+  width: 90px;
+  height: 90px;
+}

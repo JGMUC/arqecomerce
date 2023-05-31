@@ -4,7 +4,7 @@ import axios from "axios";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import AWS from 'aws-sdk';
-import Dropzone from 'react-dropzone';
+
 
 
 import {
@@ -19,10 +19,9 @@ import {
   Navbar,
   NavbarBrand
 } from "reactstrap";
-
 AWS.config.update({
-  accessKeyId: `${process.env.REACT_APP_aki}`,
-  secretAccessKey: `${process.env.REACT_APP_sak}`,
+  accessKeyId: `${process.env.REACT_APP_AKI}`,
+  secretAccessKey: `${process.env.REACT_APP_SAK}`,
 });
 
 class App extends React.Component {
@@ -247,7 +246,7 @@ class App extends React.Component {
                 <th>Ean</th>
                 <th>Marca</th>
                 <th>Cantidad</th>
-                <th>Imágen</th>
+                <th>Imágen Render</th>
                 <th>Acción</th>
               </tr>
             </thead>
@@ -262,7 +261,14 @@ class App extends React.Component {
                   <td>{dato.ean}</td>
                   <td>{dato.marca}</td>
                   <td>{dato.cantidad}</td>
-                  <td>{dato.imagen}</td>
+                  {/* <td>{dato.imagen}</td> */}
+
+                  <td>
+                    <img
+                      src={`https://arqsoftbucketjgmcdm.s3.us-east-2.amazonaws.com/${dato.imagen.replace(' ','+')}`}
+                      className="img-fixed-size"
+                    />
+                  </td>
                   <td>
                     <Button color="primary" onClick={() => this.mostrarModalComentario(dato)}>Comentarios</Button>{" "}
                     <Button color="primary" onClick={() => this.mostrarModalActualizar(dato)}>Editar</Button>{" "}

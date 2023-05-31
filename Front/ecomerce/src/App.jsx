@@ -241,8 +241,8 @@ class App extends React.Component {
                 countProducts={this.state.countProducts}
                 setCountProducts={(newCount) => this.setState({ countProducts: newCount })}
               />} />
-            <Route path="/maps" component={<Maps />} />
-            <Route path="/admin" component={<Admin />} />
+            <Route path="/Maps" element={<Maps/>}/>
+            <Route path="/Admin" element={<Admin/>} />
           </Routes>
         </>
       </Router>

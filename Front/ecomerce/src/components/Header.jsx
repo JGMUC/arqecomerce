@@ -41,17 +41,14 @@ export const Header = ({
 						alt="logo_transparent"
 						src={logo_transparent}
 						style={{
-							height: 150,
-							width: 150
+							height: 100,
+							width: 100
 						}}
 					/>
 				</NavbarBrand>
 			</Navbar>
+			<a href="/Admin">
 			<div className='container-icon'>
-				<Link to="/Admin" className='container-cart-icon'></Link>
-				<div
-					className='container-cart-icon'
-				>
 					<svg
 						xmlns='http://www.w3.org/2000/svg'
 						fill='none'
@@ -67,9 +64,7 @@ export const Header = ({
 						/>
 					</svg>
 				</div>
-
-
-			</div>
+			</a>
 		</header>
 	);
 };
